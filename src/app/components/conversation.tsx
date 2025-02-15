@@ -1,13 +1,19 @@
+
 'use client';
 
 import { useConversation } from '@11labs/react';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 export function Conversation() {
+  const [msg, setMsg] = useState<string>('');
+
   const conversation = useConversation({
     onConnect: () => console.log('Connected'),
     onDisconnect: () => console.log('Disconnected'),
-    onMessage: (message) => console.log('Message:', message),
+    onMessage: (data) => {
+      console.log('Data:', data);
+      setMsg(data.message);
+    },
     onError: (error) => console.error('Error:', error),
   });
 
@@ -16,7 +22,7 @@ export function Conversation() {
     console.log("Response Status:", response.status);
     console.log("Response Text:", await response.text());
     if (!response.ok) {
-      throw new Error(`Failed to get signed url: ${response.statusText}`);
+      throw new Error('Failed to get signed url: ${response.statusText}');
     }
     const { signedUrl } = await response.json();
     return signedUrl;
@@ -41,6 +47,7 @@ export function Conversation() {
 
   const stopConversation = useCallback(async () => {
     await conversation.endSession();
+    setMsg('');
   }, [conversation]);
 
   return (
@@ -61,7 +68,7 @@ export function Conversation() {
           Stop Conversation
         </button>
       </div>
-
+      <div>{msg}</div>
       <div className="flex flex-col items-center">
         <p>Status: {conversation.status}</p>
         <p>Agent is {conversation.isSpeaking ? 'speaking' : 'listening'}</p>

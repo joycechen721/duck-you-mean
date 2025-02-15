@@ -16,7 +16,7 @@ export async function GET() {
     }
 
     const data = await response.json();
-    return NextResponse.json({ signedUrl: data.signed_url });
+    return NextResponse.json({ data: data });
   } catch (error) {
     return NextResponse.json(
       { error: 'Failed to generate signed URL' },
