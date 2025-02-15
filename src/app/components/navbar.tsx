@@ -20,7 +20,7 @@ const Navbar: React.FC = () => {
                         className="flex items-center space-x-2 px-4 py-2 bg-white text-pink-600 rounded-full shadow-md transition-transform transform hover:scale-110 hover:bg-pink-100"
                     >
                         <User className="w-5 h-5" />
-                        <span>Profile</span>
+                        <span>Learn</span>
                     </a>
                 </li>
                 <li>
@@ -29,7 +29,7 @@ const Navbar: React.FC = () => {
                         className="flex items-center space-x-2 px-4 py-2 bg-white text-pink-600 rounded-full shadow-md transition-transform transform hover:scale-110 hover:bg-pink-100"
                     >
                         <Book className="w-5 h-5" />
-                        <span>Subjects</span>
+                        <span>Pond</span>
                     </a>
                 </li>
             </ul>

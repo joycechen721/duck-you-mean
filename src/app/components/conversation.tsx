@@ -38,6 +38,9 @@ export function Conversation() {
       // Start the conversation with your agent
       await conversation.startSession({
         agentId: process.env.NEXT_PUBLIC_AGENT_ID, 
+        dynamicVariables: {
+          subject_description: 'space, science, and technology',
+      },
       });
 
     } catch (error) {
