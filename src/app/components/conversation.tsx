@@ -13,6 +13,8 @@ export function Conversation() {
 
   const getSignedUrl = async (): Promise<string> => {
     const response = await fetch("/api/get-signed-url");
+    console.log("Response Status:", response.status);
+    console.log("Response Text:", await response.text());
     if (!response.ok) {
       throw new Error(`Failed to get signed url: ${response.statusText}`);
     }
@@ -25,12 +27,11 @@ export function Conversation() {
       // Request microphone permission
       await navigator.mediaDevices.getUserMedia({ audio: true });
 
-      const signedUrl = await getSignedUrl();
+      //const signedUrl = await getSignedUrl();
 
       // Start the conversation with your agent
       await conversation.startSession({
-        signedUrl,
-        agentId: 'YOUR_AGENT_ID', // Replace with your agent ID
+        agentId: process.env.NEXT_PUBLIC_AGENT_ID, 
       });
 
     } catch (error) {
