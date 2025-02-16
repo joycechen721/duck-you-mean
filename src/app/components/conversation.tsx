@@ -206,8 +206,7 @@ useEffect(() => {
   };
 
   return (
-    <div className={`flex ${isConversationStarted ? "bg-[url('/pond.PNG')] bg-cover bg-center" : ""} min-h-screen w-screen`}>
-
+    <div className={`flex ${isConversationStarted ? "bg-[url('/pond.PNG')] bg-cover bg-center" : ""} w-screen h-85`}>
       <div className="flex flex-col items-center justify-center w-full">
         {isConversationStarted ? (
           <div className="flex flex-col items-center gap-4 w-full">
@@ -222,7 +221,7 @@ useEffect(() => {
               </div>
               <span className="text-sm">{`${currScore / 10}%`}</span>
             </div>
-            <div>{displayedMsg}</div>
+            <div className='max-w-4xl'>{displayedMsg}</div>
             <img style={{width: '700px'}} src={duckImg} alt="talking duck gif" />
             <div className="flex gap-2">
               <img
