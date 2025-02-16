@@ -78,7 +78,7 @@ const calculateScore = async () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          subject: generatedSubject,
+          subject: topic,
           question: currQuestion,
           userAnswer: currAnswer,
         }),
@@ -173,8 +173,9 @@ useEffect(() => {
   return (
     <div className="flex flex-col items-center gap-4">
       <h1 className="text-4xl font-bold text-center mb-4">Topic: {topic}</h1>
+      Mastery of Subject:
       <div className="w-full bg-gray-200 rounded-full h-4">
-        <div
+         <div
           className="bg-blue-500 h-4 rounded-full"
           style={{ width: `${(currScore / 1000) * 100}%` }}
         ></div>

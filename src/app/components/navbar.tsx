@@ -16,7 +16,7 @@ const Navbar: React.FC = () => {
                 </li>
                 <li>
                     <a 
-                        href="/profile" 
+                        href="/learn" 
                         className="flex items-center space-x-2 px-4 py-2 bg-white text-pink-600 rounded-full shadow-md transition-transform transform hover:scale-110 hover:bg-pink-100"
                     >
                         <User className="w-5 h-5" />
@@ -25,7 +25,7 @@ const Navbar: React.FC = () => {
                 </li>
                 <li>
                     <a 
-                        href="/subjects" 
+                        href="/pond" 
                         className="flex items-center space-x-2 px-4 py-2 bg-white text-pink-600 rounded-full shadow-md transition-transform transform hover:scale-110 hover:bg-pink-100"
                     >
                         <Book className="w-5 h-5" />
