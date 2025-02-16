@@ -10,8 +10,8 @@ export function Conversation() {
   const [words, setWords] = useState<string[]>([]);
   const [wordIndex, setWordIndex] = useState(0);
   const [topic, setTopic] = useState<string>('');
+  const [generatedSubject, setGeneratedSubject] = useState<string>('');
   const [isPromptOpen, setIsPromptOpen] = useState(false);
-  const [msg, setMsg] = useState<string>('');
   const [imageUrl, setImageUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -78,15 +78,15 @@ const calculateScore = async () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          subject: generatedSubject,
           question: currQuestion,
           userAnswer: currAnswer,
-          previousScore: currScore,
         }),
       });
       const data = await response.json();
 
       if (response.ok) {
-          setCurrScore(data.score);
+          setCurrScore(currScore + data.score);
       } else {
           setError(data.error || 'Failed to calculate score');
       }
@@ -96,7 +96,6 @@ const calculateScore = async () => {
 };
 
 useEffect(() => {
-  setCurrScore(-1000);
   if (currAnswer !== '') {
     calculateScore();
   }
@@ -109,24 +108,16 @@ useEffect(() => {
     onMessage: (data: any) => {
       console.log('Data:', data);
       // log question and answer
-
       console.log("Data source: ", data.source)
       if (data.source == 'ai' ){
-        console.log("HERE IN AI")
         setCurrQuestion(data.message);
       } else if (data.source == 'user') {
-        console.log("HERE IN USER")
         setCurrAnswer(data.message);
-        // if (currAnswer !== '') {
-        //   calculateScore();
-        // }
       }
       setFullMsg(data.message);
       setWords(data.message.split(' '));
       setDisplayedMsg('');
       setWordIndex(0);
-      console.log('Question:', currQuestion);
-      console.log('Answer:', currAnswer);
     },
     onError: (error: any) => console.error('Error:', error),
   });
@@ -153,6 +144,11 @@ useEffect(() => {
       await navigator.mediaDevices.getUserMedia({ audio: true });
 
       const generatedSubject = await getFirstQuestion(topic);
+      if (generatedSubject == null){
+        console.error("Failed to generate subject");
+        return
+      }
+      setGeneratedSubject(generatedSubject);
       console.log("Generated subject:", generatedSubject);
 
       await conversation.startSession({
@@ -176,6 +172,13 @@ useEffect(() => {
 
   return (
     <div className="flex flex-col items-center gap-4">
+      <h1 className="text-4xl font-bold text-center mb-4">Topic: {topic}</h1>
+      <div className="w-full bg-gray-200 rounded-full h-4">
+        <div
+          className="bg-blue-500 h-4 rounded-full"
+          style={{ width: `${(currScore / 1000) * 100}%` }}
+        ></div>
+      </div>
       <div className="flex gap-2">
         <button
           onClick={() => setIsPromptOpen(true)}
@@ -198,6 +201,22 @@ useEffect(() => {
         <p>Agent is {conversation.isSpeaking ? 'speaking' : 'listening'}</p>
         <p>Score is {currScore}</p>
       </div>
+      <button
+        onClick={() => {
+          setCurrScore(0);
+          setCurrQuestion('');
+          setCurrAnswer('');
+          setFullMsg('');
+          setDisplayedMsg('');
+          setWords([]);
+          setWordIndex(0);
+          setTopic('');
+          stopConversation();
+        }}
+        className="px-4 py-2 bg-yellow-500 text-white rounded"
+      >
+        Restart
+      </button>
 
       {/* Topic Input Prompt */}
       {isPromptOpen && (
