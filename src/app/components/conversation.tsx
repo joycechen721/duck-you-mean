@@ -1,10 +1,13 @@
-
 'use client';
 
 import { useConversation } from '@11labs/react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export function Conversation() {
+  const [fullMsg, setFullMsg] = useState<string>(''); 
+  const [displayedMsg, setDisplayedMsg] = useState<string>(''); 
+  const [words, setWords] = useState<string[]>([]);
+  const [wordIndex, setWordIndex] = useState(0);
   const [msg, setMsg] = useState<string>('');
   const [imageUrl, setImageUrl] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -59,23 +62,36 @@ export function Conversation() {
     onDisconnect: () => console.log('Disconnected'),
     onMessage: (data : any) => {
       console.log('Data:', data);
-      setMsg(data.message);
+      setFullMsg(data.message); // Store the full message
+      setWords(data.message.split(' ')); // Split message into words
+      setDisplayedMsg(''); // Reset displayed message
+      setWordIndex(0); // Reset word index
     },
     onError: (error : any) => console.error('Error:', error),
   });
 
+  useEffect(() => {
+    if (wordIndex < words.length) {
+      const timeout = setTimeout(() => {
+        setDisplayedMsg((prev) => (prev ? prev + ' ' + words[wordIndex] : words[wordIndex]));
+        setWordIndex((prev) => prev + 1);
+      }, 80); // Adjust speed for word appearance
+
+      return () => clearTimeout(timeout); 
+    }
+  }, [wordIndex, words]);
+
   const startConversation = useCallback(async () => {
     try {
-      // Request microphone permission
       await navigator.mediaDevices.getUserMedia({ audio: true });
+
       // Start the conversation with your agent
       await conversation.startSession({
         agentId: process.env.NEXT_PUBLIC_AGENT_ID, 
-        dynamicVariables: {
+        /*dynamicVariables: {
           subject_description: 'space, science, and technology',
-      },
+        },*/
       });
-
     } catch (error) {
       console.error('Failed to start conversation:', error);
     }
@@ -83,7 +99,10 @@ export function Conversation() {
 
   const stopConversation = useCallback(async () => {
     await conversation.endSession();
-    setMsg('');
+    setFullMsg('');
+    setDisplayedMsg('');
+    setWords([]);
+    setWordIndex(0);
   }, [conversation]);
 
   return (
@@ -104,7 +123,7 @@ export function Conversation() {
           Stop Conversation
         </button>
       </div>
-      <div>{msg}</div>
+      <div>{displayedMsg}</div> {/* Display typed-out text */}
       <div className="flex flex-col items-center">
         <p>Status: {conversation.status}</p>
         <p>Agent is {conversation.isSpeaking ? 'speaking' : 'listening'}</p>
@@ -123,4 +142,4 @@ export function Conversation() {
         </div>
     </div>
   );
-  }
+}
