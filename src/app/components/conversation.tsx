@@ -206,7 +206,8 @@ useEffect(() => {
               <img
                 onClick={stopConversation}
                 src={finishConvo}
-                className='w-1/2'
+                className='w-1/2 m-0'
+                style={{margin: 'auto', marginTop: '-150px', justifyContent: 'center'}}
                 // disabled={conversation.status !== 'connected'}
                 // className="px-4 py-2 bg-red-500 text-white rounded disabled:bg-gray-300"
               >
