@@ -5,6 +5,10 @@ import { use, useCallback, useEffect, useState } from 'react';
 import { getFirstQuestion } from '../api/open-ai/genFirstQuestion/route';
 
 export function Conversation() {
+  const learningDuck = '/learningduck.png';  
+  const normalDuck = '/normalduck.png';
+  const talkingDuck = '/talkingduck.gif';
+  const finishConvo = '/finishlesson.png';
   const [isConversationStarted, setIsConversationStarted] = useState(false);
   const [userInput, setUserInput] = useState("");
   const [fullMsg, setFullMsg] = useState<string>(''); 
@@ -19,10 +23,8 @@ export function Conversation() {
   const [currQuestion, setCurrQuestion] = useState<string>('');
   const [currAnswer, setCurrAnswer] = useState<string>('');
   const [currScore, setCurrScore] = useState<number>(0);
-
-  const learningDuck = '/learningduck.png';  
-  const normalDuck = '/normalduck.png';
-  const finishConvo = '/finishlesson.png';
+  const [duckImg, setDuckImg] = useState<string>(normalDuck);
+  const [data, setData] = useState<any>(null);
 
   const handleGenerateImage = async () => {
       setLoading(true);
@@ -105,19 +107,37 @@ useEffect(() => {
   }
 }, [currAnswer]); 
 
+useEffect(() => {
+  if (data) {
+    if (data.source == 'ai') {
+      setDuckImg(talkingDuck);
+      setCurrQuestion(data.message);
+    } else if (data.source == 'user') {
+      setDuckImg(normalDuck);
+      setCurrAnswer(data.message);
+    } else {
+      setDuckImg(normalDuck);
+    }
+  }
+}, [data]);
+
 
   const conversation = useConversation({
     onConnect: () => console.log('Connected'),
     onDisconnect: () => console.log('Disconnected'),
+    // onStatusChange: () => console.log('Status changed'),
     onMessage: (data: any) => {
+      setData(data);
       console.log('Data:', data);
       // log question and answer
-      console.log("Data source: ", data.source)
-      if (data.source == 'ai' ){
-        setCurrQuestion(data.message);
-      } else if (data.source == 'user') {
-        setCurrAnswer(data.message);
-      }
+      // console.log("Data source: ", data.source)
+      // if (data.source == 'ai' ){
+      //   setDuckImg(talkingDuck);
+      //   setCurrQuestion(data.message);
+      // } else if (data.source == 'user') {
+      //   setDuckImg(normalDuck);
+      //   setCurrAnswer(data.message);
+      // }
       setFullMsg(data.message);
       setWords(data.message.split(' '));
       setDisplayedMsg('');
@@ -170,6 +190,7 @@ useEffect(() => {
     setTopic('');
     setIsConversationStarted(false);
     setUserInput('');
+    setDuckImg(normalDuck);
   }, [conversation]);
 
   const handleInputChange = (event) => {
@@ -198,16 +219,16 @@ useEffect(() => {
                   style={{ width: `${Math.max((currScore / 1000) * 100, 5)}%` }}
                 ></div>
               </div>
-              <span className="text-sm">{`${currScore / 100}%`}</span>
+              <span className="text-sm">{`${currScore / 10}%`}</span>
             </div>
             <div>{displayedMsg}</div>
-            <img style={{width: '700px'}} src={normalDuck} alt="Logo" />
+            <img style={{width: '700px'}} src={duckImg} alt="talking duck gif" />
             <div className="flex gap-2">
               <img
                 onClick={stopConversation}
                 src={finishConvo}
-                className='w-1/2 m-0'
-                style={{margin: 'auto', marginTop: '-150px', justifyContent: 'center'}}
+                className="w-1/2 h-50 object-cover m-0 mx-auto cursor-pointer"
+                style={{margin: 'auto', marginTop: '-150px', justifyContent: 'center', cursor: 'pointer'}}
                 // disabled={conversation.status !== 'connected'}
                 // className="px-4 py-2 bg-red-500 text-white rounded disabled:bg-gray-300"
               >
