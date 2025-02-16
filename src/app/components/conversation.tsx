@@ -5,6 +5,8 @@ import { use, useCallback, useEffect, useState } from 'react';
 import { getFirstQuestion } from '../api/open-ai/genFirstQuestion/route';
 
 export function Conversation() {
+  const [isOverlayVisible, setIsOverlayVisible] = useState(true);
+  const [userInput, setUserInput] = useState("");
   const [fullMsg, setFullMsg] = useState<string>(''); 
   const [displayedMsg, setDisplayedMsg] = useState<string>(''); 
   const [words, setWords] = useState<string[]>([]);
@@ -170,8 +172,43 @@ useEffect(() => {
     setWordIndex(0);
   }, [conversation]);
 
+  const handleInputChange = (event) => {
+    setUserInput(event.target.value);
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    console.log("User Input:", userInput); // You can use this elsewhere
+    setIsOverlayVisible(false);
+  };
+
   return (
+    
     <div className="flex flex-col items-center gap-4">
+      <div>
+      {/* Overlay */}
+      
+      {isOverlayVisible && (
+        <div className="overlay">
+          <div className="overlay-content">
+            <h2>Enter Input</h2>
+            <form onSubmit={handleSubmit}>
+              <input
+                type="text"
+                value={userInput}
+                onChange={handleInputChange}
+                placeholder="Type something..."
+                required
+              />
+              <button type="submit">Submit</button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      <h1>Main Page Content</h1>
+      {userInput && <p>Saved Input: {userInput}</p>}
+    </div>
     Mastery of Subject:
     <div className="w-full bg-gray-200 rounded-full h-4">
       <div
