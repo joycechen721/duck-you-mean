@@ -2,13 +2,15 @@
 
 import { useConversation } from '@11labs/react';
 import { use, useCallback, useEffect, useState } from 'react';
-import { getFirstQuestion } from '../api/open-ai/genFirstQuestion/route'
+import { getFirstQuestion } from '../api/open-ai/genFirstQuestion/route';
 
 export function Conversation() {
   const [fullMsg, setFullMsg] = useState<string>(''); 
   const [displayedMsg, setDisplayedMsg] = useState<string>(''); 
   const [words, setWords] = useState<string[]>([]);
   const [wordIndex, setWordIndex] = useState(0);
+  const [topic, setTopic] = useState<string>('');
+  const [isPromptOpen, setIsPromptOpen] = useState(false);
   const [msg, setMsg] = useState<string>('');
   const [imageUrl, setImageUrl] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -104,7 +106,7 @@ useEffect(() => {
   const conversation = useConversation({
     onConnect: () => console.log('Connected'),
     onDisconnect: () => console.log('Disconnected'),
-    onMessage: (data : any) => {
+    onMessage: (data: any) => {
       console.log('Data:', data);
       // log question and answer
 
@@ -119,14 +121,14 @@ useEffect(() => {
         //   calculateScore();
         // }
       }
-      setFullMsg(data.message); // Store the full message
-      setWords(data.message.split(' ')); // Split message into words
-      setDisplayedMsg(''); // Reset displayed message
-      setWordIndex(0); // Reset word index
+      setFullMsg(data.message);
+      setWords(data.message.split(' '));
+      setDisplayedMsg('');
+      setWordIndex(0);
       console.log('Question:', currQuestion);
       console.log('Answer:', currAnswer);
     },
-    onError: (error : any) => console.error('Error:', error),
+    onError: (error: any) => console.error('Error:', error),
   });
 
   useEffect(() => {
@@ -134,18 +136,25 @@ useEffect(() => {
       const timeout = setTimeout(() => {
         setDisplayedMsg((prev) => (prev ? prev + ' ' + words[wordIndex] : words[wordIndex]));
         setWordIndex((prev) => prev + 1);
-      }, 80); // Adjust speed for word appearance
-
-      return () => clearTimeout(timeout); 
+      }, 80);
+      return () => clearTimeout(timeout);
     }
   }, [wordIndex, words]);
 
-  const startConversation = useCallback(async () => {
+  const startConversationWithTopic = async () => {
+    if (!topic.trim()) {
+      alert('Please enter a topic!');
+      return;
+    }
+
+    setIsPromptOpen(false); // Close the input prompt
+
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
-  
-      const generatedSubject = await getFirstQuestion('space, science, and technology');
-      console.log("generated subject: ", generatedSubject)
+
+      const generatedSubject = await getFirstQuestion(topic);
+      console.log("Generated subject:", generatedSubject);
+
       await conversation.startSession({
         agentId: process.env.NEXT_PUBLIC_AGENT_ID,
         dynamicVariables: {
@@ -155,8 +164,8 @@ useEffect(() => {
     } catch (error) {
       console.error('Failed to start conversation:', error);
     }
-  }, [conversation]);
-  
+  };
+
   const stopConversation = useCallback(async () => {
     await conversation.endSession();
     setFullMsg('');
@@ -169,7 +178,7 @@ useEffect(() => {
     <div className="flex flex-col items-center gap-4">
       <div className="flex gap-2">
         <button
-          onClick={startConversation}
+          onClick={() => setIsPromptOpen(true)}
           disabled={conversation.status === 'connected'}
           className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300"
         >
@@ -183,24 +192,42 @@ useEffect(() => {
           Stop Conversation
         </button>
       </div>
-      <div>{displayedMsg}</div> {/* Display typed-out text */}
+      <div>{displayedMsg}</div>
       <div className="flex flex-col items-center">
         <p>Status: {conversation.status}</p>
         <p>Agent is {conversation.isSpeaking ? 'speaking' : 'listening'}</p>
         <p>Score is {currScore}</p>
       </div>
-      <div>
-            <button onClick={handleOpenAIGenerateImage} disabled={loading}>
-                {loading ? 'Generating...' : 'Generate Image'}
-            </button>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            {imageUrl && (
-                <div>
-                    <p>Image generated:</p>
-                    <img src={imageUrl} alt="Generated" />
-                </div>
-            )}
+
+      {/* Topic Input Prompt */}
+      {isPromptOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+            <h2 className="text-lg font-semibold mb-2">Enter a Topic</h2>
+            <input
+              type="text"
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              placeholder="e.g., Quantum Physics"
+              className="border border-gray-300 rounded px-3 py-2 w-full"
+            />
+            <div className="flex justify-center gap-4 mt-4">
+              <button 
+                onClick={startConversationWithTopic} 
+                className="px-4 py-2 bg-blue-500 text-white rounded"
+              >
+                Start
+              </button>
+              <button 
+                onClick={() => setIsPromptOpen(false)} 
+                className="px-4 py-2 bg-gray-400 text-white rounded"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
+      )}
     </div>
   );
 }
