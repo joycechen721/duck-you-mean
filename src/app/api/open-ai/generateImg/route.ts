@@ -5,6 +5,7 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 export async function POST(req:any) {
     try {
         const { prompt } = await req.json();
+        // console.log(prompt)
 
         const response = await openai.images.generate({
             model: "dall-e-3",

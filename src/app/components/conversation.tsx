@@ -37,8 +37,14 @@ export function Conversation() {
     setError(null);
     
     try {
-        const response = await fetch('/api/open-ai/generateImg', {
-            method: 'POST',
+        const response = await fetch('/api/open-ai/generateElements', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            prompt: 'a bear, a cat, a dog',
+          }),
         });
         const data = await response.json();
 

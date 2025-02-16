@@ -5,9 +5,9 @@ import { LumaAI } from 'lumaai';
 
 const client = new LumaAI({ authToken: process.env.LUMALABS_API_KEY });
 
-export async function POST() {
+export async function POST(req:any) {
     try {
-        console.log("Generating image...");
+        const { prompt } = await req.json();
         let generation = await client.generations.image.create({
             prompt: "A teddy bear in sunglasses playing electric guitar and dancing"
         });
