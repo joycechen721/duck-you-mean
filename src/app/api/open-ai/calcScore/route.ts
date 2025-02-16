@@ -1,9 +1,10 @@
 import OpenAI from "openai";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({ apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY });
 
 export async function POST(req: any) {
     try {
+        console.log("HERE")
         const { question, userAnswer, previousScore } = await req.json(); // Get the AI's question & user's answer
 
         // Step 1: Evaluate how well the user answered the question
@@ -15,12 +16,13 @@ export async function POST(req: any) {
             ],
             max_tokens: 10,
         });
+        console.log(evaluationResponse)
 
         let newScore = evaluationResponse.choices[0].message && evaluationResponse.choices[0].message.content ? parseInt(evaluationResponse.choices[0].message.content.trim(), 10) : 0;
 
         // Step 2: Ensure the score never decreases
         if (previousScore !== undefined && newScore < previousScore) {
-            newScore = previousScore; // Keep the highest score
+            newScore = previousScore + 1; // Keep the highest score
         }
 
         return Response.json({ score: newScore }, { status: 200 });

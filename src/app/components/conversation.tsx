@@ -1,7 +1,7 @@
 'use client';
 
 import { useConversation } from '@11labs/react';
-import { useCallback, useEffect, useState } from 'react';
+import { use, useCallback, useEffect, useState } from 'react';
 import { getFirstQuestion } from '../api/open-ai/genFirstQuestion/route'
 
 export function Conversation() {
@@ -13,6 +13,10 @@ export function Conversation() {
   const [imageUrl, setImageUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currQuestion, setCurrQuestion] = useState<string>('');
+  const [currAnswer, setCurrAnswer] = useState<string>('');
+  const [currScore, setCurrScore] = useState<number>(0);
+
 
   const handleGenerateImage = async () => {
       setLoading(true);
@@ -64,15 +68,63 @@ export function Conversation() {
     }
 };
 
+const calculateScore = async () => {
+  try {
+      const response = await fetch('/api/open-ai/calcScore', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          question: currQuestion,
+          userAnswer: currAnswer,
+          previousScore: currScore,
+        }),
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+          setCurrScore(data.score);
+      } else {
+          setError(data.error || 'Failed to calculate score');
+      }
+  } catch (err) {
+      setError('An error occurred while calculating the score.');
+  }
+};
+
+useEffect(() => {
+  setCurrScore(-1000);
+  if (currAnswer !== '') {
+    calculateScore();
+  }
+}, [currAnswer]); 
+
+
   const conversation = useConversation({
     onConnect: () => console.log('Connected'),
     onDisconnect: () => console.log('Disconnected'),
     onMessage: (data : any) => {
       console.log('Data:', data);
+      // log question and answer
+
+      console.log("Data source: ", data.source)
+      if (data.source == 'ai' ){
+        console.log("HERE IN AI")
+        setCurrQuestion(data.message);
+      } else if (data.source == 'user') {
+        console.log("HERE IN USER")
+        setCurrAnswer(data.message);
+        // if (currAnswer !== '') {
+        //   calculateScore();
+        // }
+      }
       setFullMsg(data.message); // Store the full message
       setWords(data.message.split(' ')); // Split message into words
       setDisplayedMsg(''); // Reset displayed message
       setWordIndex(0); // Reset word index
+      console.log('Question:', currQuestion);
+      console.log('Answer:', currAnswer);
     },
     onError: (error : any) => console.error('Error:', error),
   });
@@ -135,6 +187,7 @@ export function Conversation() {
       <div className="flex flex-col items-center">
         <p>Status: {conversation.status}</p>
         <p>Agent is {conversation.isSpeaking ? 'speaking' : 'listening'}</p>
+        <p>Score is {currScore}</p>
       </div>
       <div>
             <button onClick={handleOpenAIGenerateImage} disabled={loading}>
