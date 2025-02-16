@@ -5,7 +5,7 @@ import { use, useCallback, useEffect, useState } from 'react';
 import { getFirstQuestion } from '../api/open-ai/genFirstQuestion/route';
 
 export function Conversation() {
-  const [isOverlayVisible, setIsOverlayVisible] = useState(true);
+  const [isConversationStarted, setIsConversationStarted] = useState(false);
   const [userInput, setUserInput] = useState("");
   const [fullMsg, setFullMsg] = useState<string>(''); 
   const [displayedMsg, setDisplayedMsg] = useState<string>(''); 
@@ -13,7 +13,6 @@ export function Conversation() {
   const [wordIndex, setWordIndex] = useState(0);
   const [topic, setTopic] = useState<string>('');
   const [generatedSubject, setGeneratedSubject] = useState<string>('');
-  const [isPromptOpen, setIsPromptOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,6 +20,9 @@ export function Conversation() {
   const [currAnswer, setCurrAnswer] = useState<string>('');
   const [currScore, setCurrScore] = useState<number>(0);
 
+  const learningDuck = '/learningduck.png';  
+  const normalDuck = '/normalduck.png';
+  const finishConvo = '/finishlesson.png';
 
   const handleGenerateImage = async () => {
       setLoading(true);
@@ -134,18 +136,10 @@ useEffect(() => {
     }
   }, [wordIndex, words]);
 
-  const startConversationWithTopic = async () => {
-    if (!topic.trim()) {
-      alert('Please enter a topic!');
-      return;
-    }
-
-    setIsPromptOpen(false); // Close the input prompt
-
+  const startConversationWithTopic = async (userInput : string) => {
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
-
-      const generatedSubject = await getFirstQuestion(topic);
+      const generatedSubject = await getFirstQuestion(userInput);
       if (generatedSubject == null){
         console.error("Failed to generate subject");
         return
@@ -166,125 +160,85 @@ useEffect(() => {
 
   const stopConversation = useCallback(async () => {
     await conversation.endSession();
+    setCurrScore(0);
+    setCurrQuestion('');
+    setCurrAnswer('');
     setFullMsg('');
     setDisplayedMsg('');
     setWords([]);
     setWordIndex(0);
+    setTopic('');
+    setIsConversationStarted(false);
+    setUserInput('');
   }, [conversation]);
 
   const handleInputChange = (event) => {
     setUserInput(event.target.value);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     console.log("User Input:", userInput); // You can use this elsewhere
-    setIsOverlayVisible(false);
+    setIsConversationStarted(true);
+    setTopic(userInput);
+    await startConversationWithTopic(userInput);
   };
 
   return (
-    
-    <div className="flex flex-col items-center gap-4">
-      <div>
-      {/* Overlay */}
-      
-      {isOverlayVisible && (
-        <div className="overlay">
-          <div className="overlay-content">
-            <h2>Enter Input</h2>
-            <form onSubmit={handleSubmit}>
-              <input
-                type="text"
-                value={userInput}
-                onChange={handleInputChange}
-                placeholder="Type something..."
-                required
-              />
-              <button type="submit">Submit</button>
-            </form>
+    <div className="flex">
+      <div className="flex flex-col items-center justify-center w-full">
+        {isConversationStarted ? (
+          <div className="flex flex-col items-center gap-4 w-full">
+            <h1 className="text-4xl font-bold text-center mt-5 mb-4">Topic: {topic}</h1>
+            <div className="flex items-center w-3/5" style={{ justifyContent: 'space-between' }}>
+              <span>Mastery:</span>
+              <div className="relative w-3/4 bg-gray-200 rounded-full h-4">
+                <div
+                  className="bg-[#5e8c61] h-4 rounded-full transition-all duration-300"
+                  style={{ width: `${Math.max((currScore / 1000) * 100, 5)}%` }}
+                ></div>
+              </div>
+              <span className="text-sm">{`${currScore / 100}%`}</span>
+            </div>
+            <div>{displayedMsg}</div>
+            <img style={{width: '700px'}} src={normalDuck} alt="Logo" />
+            <div className="flex gap-2">
+              <img
+                onClick={stopConversation}
+                src={finishConvo}
+                className='w-1/2'
+                // disabled={conversation.status !== 'connected'}
+                // className="px-4 py-2 bg-red-500 text-white rounded disabled:bg-gray-300"
+              >
+              </img>
+            </div>
+            {/* <div className="flex flex-col items-center">
+              <p>Status: {conversation.status}</p>
+              <p>Agent is {conversation.isSpeaking ? 'speaking' : 'listening'}</p>
+            </div> */}
           </div>
-        </div>
-      )}
-
-      <h1>Main Page Content</h1>
-      {userInput && <p>Saved Input: {userInput}</p>}
-    </div>
-    Mastery of Subject:
-    <div className="w-full bg-gray-200 rounded-full h-4">
-      <div
-       className="bg-[#5e8c61] h-4 rounded-full"
-       style={{ width: `${(currScore / 1000) * 100}%` }}
-          ></div>
-    </div>
-      <h1 className="text-4xl font-bold text-center mb-4">Topic: {topic}</h1>
-      <div className="flex gap-2">
-        <button
-          onClick={() => setIsPromptOpen(true)}
-          disabled={conversation.status === 'connected'}
-          className="px-4 py-2 bg-[#72bda3] text-white rounded disabled:bg-gray-300"
-        >
-          Start Conversation
-        </button>
-        <button
-          onClick={stopConversation}
-          disabled={conversation.status !== 'connected'}
-          className="px-4 py-2 bg-red-500 text-white rounded disabled:bg-gray-300"
-        >
-          Stop Conversation
-        </button>
-      </div>
-      <div>{displayedMsg}</div>
-      <div className="flex flex-col items-center">
-        <p>Status: {conversation.status}</p>
-        <p>Agent is {conversation.isSpeaking ? 'speaking' : 'listening'}</p>
-        <p>Score is {currScore}</p>
-      </div>
-      <button
-        onClick={() => {
-          setCurrScore(0);
-          setCurrQuestion('');
-          setCurrAnswer('');
-          setFullMsg('');
-          setDisplayedMsg('');
-          setWords([]);
-          setWordIndex(0);
-          setTopic('');
-          stopConversation();
-        }}
-        className="px-4 py-2 bg-yellow-500 text-white rounded"
-      >
-        Restart
-      </button>
-
-      {/* Topic Input Prompt */}
-      {isPromptOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-            <h2 className="text-lg font-semibold mb-2">Enter a Topic</h2>
-            <input
-              type="text"
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              placeholder="e.g., Quantum Physics"
-              className="border border-gray-300 rounded px-3 py-2 w-full"
-            />
-            <div className="flex justify-center gap-4 mt-4">
-              <button 
-                onClick={startConversationWithTopic} 
-                className="px-4 py-2 bg-blue-500 text-white rounded"
-              >
-                Start
-              </button>
-              <button 
-                onClick={() => setIsPromptOpen(false)} 
-                className="px-4 py-2 bg-gray-400 text-white rounded"
-              >
-                Cancel
-              </button>
+        ) : (
+          <div className="">
+            <div className="overlay-content text-center w-full">
+            <img style={{width: '700px'}} src={learningDuck} alt="Logo" />
+              {/* <h2 className="text-2xl font-semibold mb-4">Enter what you want to teach!</h2> */}
+                <form onSubmit={handleSubmit} className="flex flex-col items-center w-full">
+                <div className="flex items-center border border-gray-300 rounded w-3/4 p-2">
+                  <input
+                  type="text"
+                  value={userInput}
+                  onChange={handleInputChange}
+                  placeholder="e.g. quantum physics..."
+                  required
+                  className="flex-grow p-2 outline-none"
+                  />
+                  <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded ml-2">Send</button>
+                </div>
+                </form>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
-  );
+  );  
 }

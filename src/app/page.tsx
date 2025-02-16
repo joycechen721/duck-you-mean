@@ -6,7 +6,7 @@ export default function Home() {
 
   return (
     <main
-      className="flex max-h-screen flex-col items-center justify-between h-screen"
+      className="flex flex-col items-center justify-between"
       style={{ backgroundImage: `url(${backgroundImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
     >
       <div className="z-10 max-w-5xl w-full flex flex-col items-center font-mono text-sm">
