@@ -206,7 +206,8 @@ useEffect(() => {
   };
 
   return (
-    <div className="flex">
+    <div className={`flex ${isConversationStarted ? "bg-[url('/pond.PNG')] bg-cover bg-center" : ""} min-h-screen w-screen`}>
+
       <div className="flex flex-col items-center justify-center w-full">
         {isConversationStarted ? (
           <div className="flex flex-col items-center gap-4 w-full">
