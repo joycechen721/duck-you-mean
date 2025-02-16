@@ -6,35 +6,68 @@ import { useCallback, useState } from 'react';
 
 export function Conversation() {
   const [msg, setMsg] = useState<string>('');
+  const [imageUrl, setImageUrl] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleGenerateImage = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+          const response = await fetch('/api/get-luma', {
+              method: 'POST',
+          });
+          const data = await response.json();
+
+          if (response.ok) {
+              setImageUrl(data.imageUrl);
+          } else {
+              setError(data.error || 'Failed to generate image');
+          }
+      } catch (err) {
+          setError('An error occurred while generating the image.');
+      } finally {
+          setLoading(false);
+      }
+  };
+
+  const handleOpenAIGenerateImage = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+        const response = await fetch('/api/open-ai/generateImg', {
+            method: 'POST',
+        });
+        const data = await response.json();
+
+        if (response.ok) {
+            setImageUrl(data.imageUrl);
+        } else {
+            setError(data.error || 'Failed to generate image');
+        }
+    } catch (err) {
+        setError('An error occurred while generating the image.');
+    } finally {
+        setLoading(false);
+    }
+};
 
   const conversation = useConversation({
     onConnect: () => console.log('Connected'),
     onDisconnect: () => console.log('Disconnected'),
-    onMessage: (data) => {
+    onMessage: (data : any) => {
       console.log('Data:', data);
       setMsg(data.message);
     },
-    onError: (error) => console.error('Error:', error),
+    onError: (error : any) => console.error('Error:', error),
   });
-
-  const getSignedUrl = async (): Promise<string> => {
-    const response = await fetch("/api/get-signed-url");
-    console.log("Response Status:", response.status);
-    console.log("Response Text:", await response.text());
-    if (!response.ok) {
-      throw new Error('Failed to get signed url: ${response.statusText}');
-    }
-    const { signedUrl } = await response.json();
-    return signedUrl;
-  };
 
   const startConversation = useCallback(async () => {
     try {
       // Request microphone permission
       await navigator.mediaDevices.getUserMedia({ audio: true });
-
-      //const signedUrl = await getSignedUrl();
-
       // Start the conversation with your agent
       await conversation.startSession({
         agentId: process.env.NEXT_PUBLIC_AGENT_ID, 
@@ -76,6 +109,18 @@ export function Conversation() {
         <p>Status: {conversation.status}</p>
         <p>Agent is {conversation.isSpeaking ? 'speaking' : 'listening'}</p>
       </div>
+      <div>
+            <button onClick={handleOpenAIGenerateImage} disabled={loading}>
+                {loading ? 'Generating...' : 'Generate Image'}
+            </button>
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+            {imageUrl && (
+                <div>
+                    <p>Image generated:</p>
+                    <img src={imageUrl} alt="Generated" />
+                </div>
+            )}
+        </div>
     </div>
   );
-}
+  }

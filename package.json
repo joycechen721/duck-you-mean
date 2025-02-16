@@ -10,8 +10,12 @@
   },
   "dependencies": {
     "@11labs/react": "^0.0.7",
+    "fs": "^0.0.1-security",
     "lucide-react": "^0.475.0",
+    "lumaai": "^1.4.0",
     "next": "15.1.7",
+    "node-fetch": "^3.3.2",
+    "openai": "^4.85.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
