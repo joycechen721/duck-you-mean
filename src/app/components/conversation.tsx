@@ -172,19 +172,19 @@ useEffect(() => {
 
   return (
     <div className="flex flex-col items-center gap-4">
+    Mastery of Subject:
+    <div className="w-full bg-gray-200 rounded-full h-4">
+      <div
+       className="bg-[#5e8c61] h-4 rounded-full"
+       style={{ width: `${(currScore / 1000) * 100}%` }}
+          ></div>
+    </div>
       <h1 className="text-4xl font-bold text-center mb-4">Topic: {topic}</h1>
-      Mastery of Subject:
-      <div className="w-full bg-gray-200 rounded-full h-4">
-         <div
-          className="bg-blue-500 h-4 rounded-full"
-          style={{ width: `${(currScore / 1000) * 100}%` }}
-        ></div>
-      </div>
       <div className="flex gap-2">
         <button
           onClick={() => setIsPromptOpen(true)}
           disabled={conversation.status === 'connected'}
-          className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300"
+          className="px-4 py-2 bg-[#72bda3] text-white rounded disabled:bg-gray-300"
         >
           Start Conversation
         </button>
