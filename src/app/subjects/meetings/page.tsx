@@ -79,32 +79,10 @@ export default function SubjectsPage() {
 
                 {/* Vertical Cards with Image for Study Rooms */}
                 <div className="mt-8 w-full max-w-4xl mx-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
-
-                    {/* Notional Card 4 */}
-                    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                        <Image 
-                            src="/LanguageDuck.png" 
-                            alt="Literature Review Techniques" 
-                            width={300} 
-                            height={200} 
-                            className="object-cover w-full h-48"
-                        />
-                        <div className="p-4">
-                            <h3 className="text-xl font-semibold text-blue-800">Literature Review Techniques</h3>
-                            <a 
-                                href="https://zoom.us/j/4567890123" 
-                                target="_blank" 
-                                rel="noopener noreferrer" 
-                                className="text-blue-600 font-semibold hover:text-blue-800 underline mt-2 block"
-                            >
-                                Join Study Room
-                            </a>
-                        </div>
-                    </div>
                     {/* Notional Card 1 */}
                     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
                         <Image 
-                            src="/MathDuck.PNG" 
+                            src="/pond-image.jpg" 
                             alt="Math 101" 
                             width={300} 
                             height={200} 
@@ -126,8 +104,8 @@ export default function SubjectsPage() {
                     {/* Notional Card 2 */}
                     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
                         <Image 
-                            src="/ScienceDuck.png" 
-                            alt="Chemistry Basics" 
+                            src="/pond-image.jpg" 
+                            alt="Computer Science Basics" 
                             width={300} 
                             height={200} 
                             className="object-cover w-full h-48"
@@ -148,8 +126,8 @@ export default function SubjectsPage() {
                     {/* Notional Card 3 */}
                     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
                         <Image 
-                            src="/HistoryDuck.png" 
-                            alt="History of America" 
+                            src="/pond-image.jpg" 
+                            alt="History of Science" 
                             width={300} 
                             height={200} 
                             className="object-cover w-full h-48"
@@ -167,7 +145,27 @@ export default function SubjectsPage() {
                         </div>
                     </div>
 
-                    
+                    {/* Notional Card 4 */}
+                    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+                        <Image 
+                            src="/pond-image.jpg" 
+                            alt="Literature Review Techniques" 
+                            width={300} 
+                            height={200} 
+                            className="object-cover w-full h-48"
+                        />
+                        <div className="p-4">
+                            <h3 className="text-xl font-semibold text-blue-800">Literature Review Techniques</h3>
+                            <a 
+                                href="https://zoom.us/j/4567890123" 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="text-blue-600 font-semibold hover:text-blue-800 underline mt-2 block"
+                            >
+                                Join Study Room
+                            </a>
+                        </div>
+                    </div>
                 </div>
                 
             </div>
