@@ -31,14 +31,16 @@ export function Conversation() {
   const [data, setData] = useState<any>(null);
   const [conversationEnded, setConversationEnded] = useState(false);
 
-  const generateImg = async (topic: string) => {
+  const generateImg = async (topic: string, userAnswer: string) => {
+    const prompt = `A colorful and realistic sketch illustrating ${topic}. The image should reflect the user's idea: "${userAnswer}", making it engaging and visually appealing.`;
+
     const imageRes = await fetch('/api/get-luma', {
       method: 'POST',
       headers: {
     'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        prompt: 'A colorful cute sketch of ' + topic,
+        prompt,
       }),
     });
     const imageData = await imageRes.json();
@@ -78,7 +80,7 @@ const calculateScore = async () => {
 useEffect(() => {
   if (currAnswer !== '') {
     calculateScore();
-    generateImg(topic + currAnswer);
+    generateImg(topic, currAnswer);
   }
 }, [currAnswer]); 
 
