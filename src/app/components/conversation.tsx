@@ -2,6 +2,7 @@
 
 import { useConversation } from '@11labs/react';
 import { useCallback, useEffect, useState } from 'react';
+import { getFirstQuestion } from '../api/open-ai/genFirstQuestion/route'
 
 export function Conversation() {
   const [fullMsg, setFullMsg] = useState<string>(''); 
@@ -84,19 +85,20 @@ export function Conversation() {
   const startConversation = useCallback(async () => {
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
-
-      // Start the conversation with your agent
+  
+      const generatedSubject = await getFirstQuestion('space, science, and technology');
+      console.log("generated subject: ", generatedSubject)
       await conversation.startSession({
-        agentId: process.env.NEXT_PUBLIC_AGENT_ID, 
-        /*dynamicVariables: {
-          subject_description: 'space, science, and technology',
-        },*/
+        agentId: process.env.NEXT_PUBLIC_AGENT_ID,
+        dynamicVariables: {
+          subject_description: generatedSubject,
+        },
       });
     } catch (error) {
       console.error('Failed to start conversation:', error);
     }
   }, [conversation]);
-
+  
   const stopConversation = useCallback(async () => {
     await conversation.endSession();
     setFullMsg('');
