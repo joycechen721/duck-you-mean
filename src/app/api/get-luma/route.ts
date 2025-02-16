@@ -9,7 +9,7 @@ export async function POST(req:any) {
     try {
         const { prompt } = await req.json();
         let generation = await client.generations.image.create({
-            prompt: "A teddy bear in sunglasses playing electric guitar and dancing"
+            prompt,
         });
 
         let completed = false;
